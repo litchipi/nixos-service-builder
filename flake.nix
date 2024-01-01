@@ -21,6 +21,7 @@
   flake-utils.lib.eachDefaultSystem (system:
    let
     pkgs = import nixpkgs { inherit system; };
+    lib = pkgs.lib;
 
     built_system = nixosgen.nixosGenerate {
       inherit pkgs;
@@ -28,6 +29,24 @@
       modules = [ ./base.nix ./module.nix home-manager.nixosModules.home-manager ];
     };
   in {
+    packages = let
+      version = "v1.0.0-RC2";
+      src = pkgs.fetchFromGitHub {
+        owner = "mealie-recipes";
+        repo = "mealie";
+        rev = version;
+        sha256 = "sha256-/sht8s0Nap6TdYxAqamKj/HGGV21/8eYCuYzpWXRJCE=";
+      };
+    in rec {
+      backend = import ./mealie-backend.nix { inherit lib pkgs version src; };
+      frontend = import ./mealie-frontend.nix { inherit lib pkgs version src; };
+      test = let 
+      in pkgs.writeShellScript "test-mealie" ''
+        export PYTHONPATH="${backend.pythonPath}:${backend}/lib/${backend.python3.libPrefix}/site-packages"
+        export STATIC_FILES="${frontend}"
+      '';
+    };
+
     apps.default = {
       type = "app";
       program = let
