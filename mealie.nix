@@ -14,7 +14,7 @@ let
 in
 {
   options.services.mealie = {
-    enable = pkgs.mkEnableOption "Mealie, a recipe manager and meal planner";
+    enable = lib.mkEnableOption "Mealie, a recipe manager and meal planner";
 
     # TODO api_port
     # TODO log_level
@@ -23,7 +23,7 @@ in
     # TODO port
   };
 
-  config = pkgs.mkIf cfg.enable {
+  config = lib.mkIf cfg.enable {
     systemd.services.mealie = {
       description = "Mealie, a self hosted recipe manager and meal planner";
       after = [
@@ -35,8 +35,9 @@ in
       ];
 
       environment = {
-        PYTHONPATH = "${backend.pythonPath}:${backend}/lib/${backend.python3.libPrefix}/site-packages";
+        PYTHONPATH = "${backend.python_path}:${backend}/lib/${backend.python.libPrefix}/site-packages";
         STATIC_FILES = "${frontend}";
+        PRODUCTION = "true";
 
         # TODO  Additionnal config
         # See https://github.com/mealie-recipes/mealie/blob/mealie-next/mealie/core/settings/settings.py
@@ -49,10 +50,20 @@ in
       serviceConfig = {
         DynamicUser = true;
         User = "mealie";
-        ExecStartPre = pkgs.writeShellScript "mealie-start-pre" ''
-          ${backend.python3.interpreter} ${backend}/lib/${backend.python3.libPrefix}/site-packages/mealie/db/init_db.py
-        '';
-        ExecStart = "${pkgs.python3Packages.gunicorn}/bin/gunicorn -b 0.0.0.0:9000 -k uvicorn.workers.UvicornWorker mealie.app:app";
+        ExecStartPre = "${backend.interpreter} ${backend}/lib/${backend.python.libPrefix}/site-packages/mealie/db/init_db.py";
+
+  # TODO  FIXME  Alembic config file not found
+  #   File "/nix/store/smng9jxnqqm9s4gcxzdswwn5wi3ym5iz-python3.10-mealie-v1.0.0-RC2/lib/python3.10/site-packages/mealie/db/init_db.py", line 47, in db_is_at_head
+  #     directory = script.ScriptDirectory.from_config(alembic_cfg)
+  #   File "/nix/store/ca6gj26yjk7dwqxv236gm2s27grc24xv-python3.10-alembic-1.12.0/lib/python3.10/site-packages/alembic/script/base.py", line 162, in from_config
+  #     script_location = config.get_main_option("script_location")
+  #   File "/nix/store/ca6gj26yjk7dwqxv236gm2s27grc24xv-python3.10-alembic-1.12.0/lib/python3.10/site-packages/alembic/config.py", line 332, in get_main_option
+  #     return self.get_section_option(self.config_ini_section, name, default)
+  #   File "/nix/store/ca6gj26yjk7dwqxv236gm2s27grc24xv-python3.10-alembic-1.12.0/lib/python3.10/site-packages/alembic/config.py", line 305, in get_section_option
+  #     raise util.CommandError(
+  #        alembic.util.exc.CommandError: No config file '/nix/store/smng9jxnqqm9s4gcxzdswwn5wi3ym5iz-python3.10-mealie-v1.0.0-RC2/lib/python3.10/site-packages/alembic.ini' found>
+        
+        ExecStart = "${backend.pythonpkg.gunicorn}/bin/gunicorn -b 0.0.0.0:9000 -k uvicorn.workers.UvicornWorker mealie.app:app";
         StateDirectory = "mealie";
       };
     };

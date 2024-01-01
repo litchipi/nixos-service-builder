@@ -26,7 +26,12 @@
     built_system = nixosgen.nixosGenerate {
       inherit pkgs;
       format = "vm-nogui";
-      modules = [ ./base.nix ./module.nix home-manager.nixosModules.home-manager ];
+      modules = [
+        ./base.nix
+        ./module.nix
+        home-manager.nixosModules.home-manager
+        ./mealie.nix
+      ];
     };
   in {
     packages = let
@@ -37,14 +42,9 @@
         rev = version;
         sha256 = "sha256-/sht8s0Nap6TdYxAqamKj/HGGV21/8eYCuYzpWXRJCE=";
       };
-    in rec {
+    in {
       backend = import ./mealie-backend.nix { inherit lib pkgs version src; };
       frontend = import ./mealie-frontend.nix { inherit lib pkgs version src; };
-      test = let 
-      in pkgs.writeShellScript "test-mealie" ''
-        export PYTHONPATH="${backend.pythonPath}:${backend}/lib/${backend.python3.libPrefix}/site-packages"
-        export STATIC_FILES="${frontend}"
-      '';
     };
 
     apps.default = {

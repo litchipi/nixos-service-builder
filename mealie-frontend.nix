@@ -1,4 +1,4 @@
-{ pkgs, lib, src, version, ...}:
+{ pkgs, src, ...}:
 (pkgs.mkYarnPackage {
   name = "mealie-frontend";
   src = "${src}/frontend";
@@ -29,7 +29,6 @@ in
       dirname = "dist";
     in ''
       runHook preInstall
-      ls -lh deps/${pname}/
       mv deps/${pname}/${dirname} $out
       runHook postInstall
     '';
