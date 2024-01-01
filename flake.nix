@@ -10,16 +10,22 @@
       url = "github:nix-community/nixos-generators";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    home-manager = {
+      url = "github:nix-community/home-manager/release-23.11";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { nixpkgs, nixosgen, flake-utils, ...}: flake-utils.lib.eachDefaultSystem (system:
+  outputs = { nixpkgs, nixosgen, flake-utils, home-manager, ...}:
+  flake-utils.lib.eachDefaultSystem (system:
    let
     pkgs = import nixpkgs { inherit system; };
 
     built_system = nixosgen.nixosGenerate {
       inherit pkgs;
       format = "vm-nogui";
-      modules = [ ./base.nix ./module.nix ];
+      modules = [ ./base.nix ./module.nix home-manager.nixosModules.home-manager ];
     };
   in {
     apps.default = {
