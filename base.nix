@@ -1,4 +1,4 @@
-{config, pkgs, lib, ...}: let
+{...}: let
   username = "op";
   stateVersion = "23.11";
   col_user = [204 158 133];
@@ -11,6 +11,7 @@ in {
     password = username;
     isNormalUser = true;
     group = username;
+    extraGroups = ["wheel"];
   };
   users.groups.${username} = {};
 
