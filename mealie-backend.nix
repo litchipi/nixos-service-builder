@@ -53,11 +53,6 @@ pythonpkg.buildPythonPackage rec {
     python-jose
     ldap
     pytesseract
-
-    # APScheduler
-    # fastapi-camelcase
-    # pathvalidate
-    # requests
   ];
 
   disabledTestPaths = []; # TODO Skip single one instead of disabling checks
@@ -83,7 +78,6 @@ pythonpkg.buildPythonPackage rec {
     homepage = "https://nightly.mealie.io";
     license = licenses.agpl3;
     maintainers = with maintainers; [
-      hexa
     ];
   };
 }

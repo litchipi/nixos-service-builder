@@ -50,11 +50,6 @@ in
     virtualisation.forwardPorts = [
       { from = "host"; guest.port = cfg.port; host.port = cfg.port; }
     ];
-    # users.users.mealie = {
-    #   isSystemUser = true;
-    #   group = "mealie";
-    # };
-    # users.groups.mealie = {};
 
     systemd.services.mealie = {
       description = "Mealie, a self hosted recipe manager and meal planner";
@@ -69,15 +64,8 @@ in
       environment = {
         PYTHONPATH = "${backend.python_path}:${backend}/lib/${backend.python.libPrefix}/site-packages";
         STATIC_FILES = "${frontend}";
-        MEALIE_LOG_FILE = "/var/log/mealie/mealie.log";
-        # ALEMBIC_CONFIG_FPATH = "${src}/alembic.ini";
 
-        # TODO  Additionnal config
-        # See https://github.com/mealie-recipes/mealie/blob/mealie-next/mealie/core/settings/settings.py
-        LOG_LEVEL = cfg.log_level;
-        # ALLOW_SIGNUP = cfg.allow_signup;
-        API_PORT = builtins.toString cfg.port;
-        BASE_URL = "${cfg.protocol}://${cfg.host}:${builtins.toString cfg.port}";
+        MEALIE_LOG_FILE = "/var/log/mealie/mealie.log";
         ALEMBIC_CONFIG_FPATH="/var/lib/mealie/alembic.ini";
 
         DEFAULT_GROUP="Home";
@@ -86,12 +74,19 @@ in
         PRODUCTION = "true";
         API_DOCS = "False";
         DB_ENGINE = "sqlite";
+        TOKEN_TIME="24";
+
+        LOG_LEVEL = cfg.log_level;
+        API_PORT = builtins.toString cfg.port;
+        BASE_URL = "${cfg.protocol}://${cfg.host}:${builtins.toString cfg.port}";
+
+        # TODO  Additionnal config
+        # ALLOW_SIGNUP = cfg.allow_signup;
         # POSTGRES_USER=mealie
         # POSTGRES_PASSWORD=mealie
         # POSTGRES_SERVER=postgres
         # POSTGRES_PORT=5432
         # POSTGRES_DB=mealie
-        TOKEN_TIME="24";
         # LDAP_AUTH_ENABLED=False
         # LDAP_SERVER_URL=""
         # LDAP_TLS_INSECURE=False
@@ -111,9 +106,6 @@ in
       # TODO  Error in init_db.py
       serviceConfig = {
         DynamicUser = true;
-        # ProtectHome="read-only";
-        # PrivateTmp="yes";
-        # RemoveIPC="yes";
         User = "mealie";
         ExecStartPre = let
           alembic_scripts_path = "/var/lib/mealie/alembic";
