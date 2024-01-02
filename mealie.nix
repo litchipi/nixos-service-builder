@@ -19,8 +19,30 @@ in
     # TODO api_port
     # TODO log_level
     # TODO allow_signup
-    # TODO host
-    # TODO port
+
+    host = lib.mkOption {
+      type = lib.types.str;
+      default = "localhost";
+      description = "Host on which creating the URL on the service";
+    };
+
+    port = lib.mkOption {
+      type = lib.types.port;
+      default = 9000;
+      description = "Port on which to serve the Mealie service";
+    };
+
+    protocol = lib.mkOption {
+      type = lib.types.str;
+      default = "http";
+      description = "Protocol to use to serve the service";
+    };
+
+    log_level = lib.mkOption {
+      type = lib.types.str;
+      default = "INFO";
+      description = "Log level to use for this service";
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -37,33 +59,29 @@ in
       environment = {
         PYTHONPATH = "${backend.python_path}:${backend}/lib/${backend.python.libPrefix}/site-packages";
         STATIC_FILES = "${frontend}";
+        # ALEMBIC_CONFIG_FPATH = "${src}/alembic.ini";
         PRODUCTION = "true";
 
         # TODO  Additionnal config
         # See https://github.com/mealie-recipes/mealie/blob/mealie-next/mealie/core/settings/settings.py
-        # API_PORT = builtins.toString cfg.api_port;
-        # LOG_LEVEL = cfg.log_level;
+        LOG_LEVEL = cfg.log_level;
         # ALLOW_SIGNUP = cfg.allow_signup;
-        # BASE_URL = "${cfg.host}:${builtins.toString cfg.port}";
+        API_PORT = builtins.toString cfg.port;
+        BASE_URL = "${cfg.protocol}://${cfg.host}:${builtins.toString cfg.port}";
+        ALEMBIC_CONFIG_FPATH="/var/lib/mealie/alembic.ini";
       };
 
       serviceConfig = {
         DynamicUser = true;
         User = "mealie";
-        ExecStartPre = "${backend.interpreter} ${backend}/lib/${backend.python.libPrefix}/site-packages/mealie/db/init_db.py";
-
-  # TODO  FIXME  Alembic config file not found
-  #   File "/nix/store/smng9jxnqqm9s4gcxzdswwn5wi3ym5iz-python3.10-mealie-v1.0.0-RC2/lib/python3.10/site-packages/mealie/db/init_db.py", line 47, in db_is_at_head
-  #     directory = script.ScriptDirectory.from_config(alembic_cfg)
-  #   File "/nix/store/ca6gj26yjk7dwqxv236gm2s27grc24xv-python3.10-alembic-1.12.0/lib/python3.10/site-packages/alembic/script/base.py", line 162, in from_config
-  #     script_location = config.get_main_option("script_location")
-  #   File "/nix/store/ca6gj26yjk7dwqxv236gm2s27grc24xv-python3.10-alembic-1.12.0/lib/python3.10/site-packages/alembic/config.py", line 332, in get_main_option
-  #     return self.get_section_option(self.config_ini_section, name, default)
-  #   File "/nix/store/ca6gj26yjk7dwqxv236gm2s27grc24xv-python3.10-alembic-1.12.0/lib/python3.10/site-packages/alembic/config.py", line 305, in get_section_option
-  #     raise util.CommandError(
-  #        alembic.util.exc.CommandError: No config file '/nix/store/smng9jxnqqm9s4gcxzdswwn5wi3ym5iz-python3.10-mealie-v1.0.0-RC2/lib/python3.10/site-packages/alembic.ini' found>
-        
-        ExecStart = "${backend.pythonpkg.gunicorn}/bin/gunicorn -b 0.0.0.0:9000 -k uvicorn.workers.UvicornWorker mealie.app:app";
+        ExecStartPre = let
+          alembic_scripts_path = "/var/lib/mealie/alembic";
+        in pkgs.writeShellScript "startup-mealie.sh" ''
+          mkdir -p ${alembic_scripts_path}
+          ${pkgs.toybox}/bin/sed 's+script_location = alembic+script_location = ${alembic_scripts_path}+g' ${src}/alembic.ini > $ALEMBIC_CONFIG_FPATH
+          ${backend.interpreter} ${backend}/lib/${backend.python.libPrefix}/site-packages/mealie/db/init_db.py
+        '';
+        ExecStart = "${backend.pythonpkg.gunicorn}/bin/gunicorn -b 0.0.0.0:${builtins.toString cfg.port} -k uvicorn.workers.UvicornWorker mealie.app:app";
         StateDirectory = "mealie";
       };
     };

@@ -8,7 +8,10 @@ pythonpkg.buildPythonPackage rec {
   inherit pname version src;
   format = "pyproject";
 
-  patches = [ ./mealie_statedir.patch ];
+  patches = [
+    ./mealie_statedir.patch
+    ./mealie_init_db.patch
+  ];
 
   nativeBuildInputs = [
     pythonpkg.poetry-core
