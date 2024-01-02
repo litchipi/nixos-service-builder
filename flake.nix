@@ -34,6 +34,7 @@
       ];
     };
   in {
+    nixosModules.default = import ./mealie.nix;
     packages = let
       version = "v1.0.0-RC2";
       src = pkgs.fetchFromGitHub {
