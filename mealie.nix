@@ -71,16 +71,18 @@ in
         ALEMBIC_CONFIG_FPATH="/var/lib/mealie/alembic.ini";
       };
 
+      # TODO  Error in init_db.py
       serviceConfig = {
         DynamicUser = true;
         User = "mealie";
         ExecStartPre = let
           alembic_scripts_path = "/var/lib/mealie/alembic";
-        in pkgs.writeShellScript "startup-mealie.sh" ''
-          mkdir -p ${alembic_scripts_path}
-          ${pkgs.toybox}/bin/sed 's+script_location = alembic+script_location = ${alembic_scripts_path}+g' ${src}/alembic.ini > $ALEMBIC_CONFIG_FPATH
-          ${backend.interpreter} ${backend}/lib/${backend.python.libPrefix}/site-packages/mealie/db/init_db.py
-        '';
+          exec = pkgs.writeShellScript "startup-mealie.sh" ''
+            mkdir -p ${alembic_scripts_path}
+            ${pkgs.toybox}/bin/sed 's+script_location = alembic+script_location = ${alembic_scripts_path}+g' ${src}/alembic.ini > $ALEMBIC_CONFIG_FPATH
+            ${backend.interpreter} ${backend}/lib/${backend.python.libPrefix}/site-packages/mealie/db/init_db.py
+          '';
+        in "+${exec}";
         ExecStart = "${backend.pythonpkg.gunicorn}/bin/gunicorn -b 0.0.0.0:${builtins.toString cfg.port} -k uvicorn.workers.UvicornWorker mealie.app:app";
         StateDirectory = "mealie";
       };
