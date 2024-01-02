@@ -11,6 +11,7 @@ pythonpkg.buildPythonPackage rec {
   patches = [
     ./mealie_statedir.patch
     ./mealie_init_db.patch
+    ./mealie_logger.patch
   ];
 
   nativeBuildInputs = [
@@ -23,7 +24,14 @@ pythonpkg.buildPythonPackage rec {
     pyyaml
     sqlalchemy
     aiofiles
-    alembic
+    (alembic.overrideAttrs (old: {
+      src = pkgs.fetchFromGitHub {
+        owner = "sqlalchemy";
+        repo = "alembic";
+        rev = "rel_1_11_3";
+        sha256 = "sha256-AmkLfrmTu5KLILDBVqLo6on7xtT8hSSnxnNym6dzEq4=";
+      };
+    }))
     aniso8601
     appdirs
     apprise

@@ -46,6 +46,16 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    networking.firewall.allowedTCPPorts = [ cfg.port ];
+    virtualisation.forwardPorts = [
+      { from = "host"; guest.port = cfg.port; host.port = cfg.port; }
+    ];
+    # users.users.mealie = {
+    #   isSystemUser = true;
+    #   group = "mealie";
+    # };
+    # users.groups.mealie = {};
+
     systemd.services.mealie = {
       description = "Mealie, a self hosted recipe manager and meal planner";
       after = [
@@ -59,8 +69,8 @@ in
       environment = {
         PYTHONPATH = "${backend.python_path}:${backend}/lib/${backend.python.libPrefix}/site-packages";
         STATIC_FILES = "${frontend}";
+        MEALIE_LOG_FILE = "/var/log/mealie/mealie.log";
         # ALEMBIC_CONFIG_FPATH = "${src}/alembic.ini";
-        PRODUCTION = "true";
 
         # TODO  Additionnal config
         # See https://github.com/mealie-recipes/mealie/blob/mealie-next/mealie/core/settings/settings.py
@@ -69,22 +79,53 @@ in
         API_PORT = builtins.toString cfg.port;
         BASE_URL = "${cfg.protocol}://${cfg.host}:${builtins.toString cfg.port}";
         ALEMBIC_CONFIG_FPATH="/var/lib/mealie/alembic.ini";
+
+        DEFAULT_GROUP="Home";
+        DEFAULT_EMAIL="changeme@example.com";
+        DEFAULT_PASSWORD="MyPassword";
+        PRODUCTION = "true";
+        API_DOCS = "False";
+        DB_ENGINE = "sqlite";
+        # POSTGRES_USER=mealie
+        # POSTGRES_PASSWORD=mealie
+        # POSTGRES_SERVER=postgres
+        # POSTGRES_PORT=5432
+        # POSTGRES_DB=mealie
+        TOKEN_TIME="24";
+        # LDAP_AUTH_ENABLED=False
+        # LDAP_SERVER_URL=""
+        # LDAP_TLS_INSECURE=False
+        # LDAP_TLS_CACERTFILE=
+        # LDAP_ENABLE_STARTTLS=False
+        # LDAP_BASE_DN=""
+        # LDAP_QUERY_BIND=""
+        # LDAP_QUERY_PASSWORD=""
+        # LDAP_USER_FILTER="(&(|({id_attribute}={input})({mail_attribute}={input}))(objectClass=person))"
+
+        # LDAP_ADMIN_FILTER=""
+        # LDAP_ID_ATTRIBUTE=uid
+        # LDAP_NAME_ATTRIBUTE=name
+        # LDAP_MAIL_ATTRIBUTE=mail
       };
 
       # TODO  Error in init_db.py
       serviceConfig = {
         DynamicUser = true;
+        # ProtectHome="read-only";
+        # PrivateTmp="yes";
+        # RemoveIPC="yes";
         User = "mealie";
         ExecStartPre = let
           alembic_scripts_path = "/var/lib/mealie/alembic";
           exec = pkgs.writeShellScript "startup-mealie.sh" ''
-            mkdir -p ${alembic_scripts_path}
             ${pkgs.toybox}/bin/sed 's+script_location = alembic+script_location = ${alembic_scripts_path}+g' ${src}/alembic.ini > $ALEMBIC_CONFIG_FPATH
+            ${pkgs.toybox}/bin/cp -r ${src}/alembic ${alembic_scripts_path}
             ${backend.interpreter} ${backend}/lib/${backend.python.libPrefix}/site-packages/mealie/db/init_db.py
           '';
-        in "+${exec}";
+        in "${exec}";
         ExecStart = "${backend.pythonpkg.gunicorn}/bin/gunicorn -b 0.0.0.0:${builtins.toString cfg.port} -k uvicorn.workers.UvicornWorker mealie.app:app";
         StateDirectory = "mealie";
+        LogsDirectory = "mealie";
       };
     };
   };

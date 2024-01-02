@@ -1,0 +1,18 @@
+diff --git a/mealie/core/root_logger.py b/mealie/core/root_logger.py
+index 29db504f..30fc05dc 100644
+--- a/mealie/core/root_logger.py
++++ b/mealie/core/root_logger.py
+@@ -9,7 +9,12 @@ DATA_DIR = determine_data_dir()
+ 
+ from .config import get_app_settings  # noqa E402
+ 
+-LOGGER_FILE = DATA_DIR.joinpath("mealie.log")
++import os
++
++LOGGER_FILE = os.getenv("MEALIE_LOG_FILE")
++if not LOGGER_FILE:
++    LOGGER_FILE = DATA_DIR.joinpath("mealie.log")
++
+ DATE_FORMAT = "%d-%b-%y %H:%M:%S"
+ LOGGER_FORMAT = "%(levelname)s: %(asctime)s \t%(message)s"
+ 

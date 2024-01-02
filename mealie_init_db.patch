@@ -1,5 +1,5 @@
 diff --git a/mealie/db/init_db.py b/mealie/db/init_db.py
-index 90dd91a8..146c452a 100644
+index 90dd91a8..6b0448ab 100644
 --- a/mealie/db/init_db.py
 +++ b/mealie/db/init_db.py
 @@ -1,3 +1,4 @@
@@ -7,7 +7,7 @@ index 90dd91a8..146c452a 100644
  from collections.abc import Callable
  from pathlib import Path
  from time import sleep
-@@ -85,7 +86,12 @@ def main():
+@@ -85,7 +86,13 @@ def main():
              if max_retry == 0:
                  raise ConnectionError("Database connection failed - exiting application.")
  
@@ -17,20 +17,8 @@ index 90dd91a8..146c452a 100644
 +            raise Exception("Environment variable ALEMBIC_CONFIG_FPATH not found")
 +        if not os.path.isfile(alembic_cfg_path):
 +            raise Exception("Provided alembic config path doesn't exist")
++
 +        alembic_cfg = Config(alembic_cfg_path)
          if db_is_at_head(alembic_cfg):
              logger.debug("Migration not needed.")
          else:
-@@ -97,9 +103,10 @@ def main():
- 
-         db = get_repositories(session)
- 
--        if db.users.get_all():
-+        try:
-+            db.users.get_all()
-             logger.debug("Database exists")
--        else:
-+        except:
-             logger.info("Database contains no users, initializing...")
-             init_db(db)
- 
