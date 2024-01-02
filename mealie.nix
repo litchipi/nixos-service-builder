@@ -16,8 +16,6 @@ in
   options.services.mealie = {
     enable = lib.mkEnableOption "Mealie, a recipe manager and meal planner";
 
-    # TODO api_port
-    # TODO log_level
     # TODO allow_signup
 
     host = lib.mkOption {
@@ -103,7 +101,6 @@ in
         # LDAP_MAIL_ATTRIBUTE=mail
       };
 
-      # TODO  Error in init_db.py
       serviceConfig = {
         DynamicUser = true;
         User = "mealie";

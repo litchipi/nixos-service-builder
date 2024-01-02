@@ -56,7 +56,7 @@ pythonpkg.buildPythonPackage rec {
   ];
 
   disabledTestPaths = []; # TODO Skip single one instead of disabling checks
-  doCheck = false; #true;
+  doCheck = false; #true; # FIXME With the patch, requires data directory to perform checks
   checkInputs = with pythonpkg; [
     pytestCheckHook
   ];
