@@ -45,9 +45,6 @@ in
 
   config = lib.mkIf cfg.enable {
     networking.firewall.allowedTCPPorts = [ cfg.port ];
-    virtualisation.forwardPorts = [
-      { from = "host"; guest.port = cfg.port; host.port = cfg.port; }
-    ];
 
     systemd.services.mealie = {
       description = "Mealie, a self hosted recipe manager and meal planner";
