@@ -1,5 +1,5 @@
 diff --git a/mealie/db/init_db.py b/mealie/db/init_db.py
-index 90dd91a8..6b0448ab 100644
+index 90dd91a8..d19a5eac 100644
 --- a/mealie/db/init_db.py
 +++ b/mealie/db/init_db.py
 @@ -1,3 +1,4 @@
@@ -7,14 +7,15 @@ index 90dd91a8..6b0448ab 100644
  from collections.abc import Callable
  from pathlib import Path
  from time import sleep
-@@ -85,7 +86,13 @@ def main():
+@@ -85,7 +86,14 @@ def main():
              if max_retry == 0:
                  raise ConnectionError("Database connection failed - exiting application.")
  
 -        alembic_cfg = Config(str(PROJECT_DIR / "alembic.ini"))
 +        alembic_cfg_path = os.getenv("ALEMBIC_CONFIG_FPATH")
 +        if not alembic_cfg_path:
-+            raise Exception("Environment variable ALEMBIC_CONFIG_FPATH not found")
++            alembic_cfg_path = str(PROJECT_DIR / "alembic.ini")
++
 +        if not os.path.isfile(alembic_cfg_path):
 +            raise Exception("Provided alembic config path doesn't exist")
 +

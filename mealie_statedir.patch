@@ -1,25 +1,25 @@
 diff --git a/mealie/core/config.py b/mealie/core/config.py
-index 19a347d..dc13704 100644
+index 7dae9b23..71769098 100644
 --- a/mealie/core/config.py
 +++ b/mealie/core/config.py
-@@ -19,16 +19,10 @@ DATA_DIR = os.getenv("DATA_DIR")
+@@ -19,15 +19,15 @@ DATA_DIR = os.getenv("DATA_DIR")
  
  
  def determine_data_dir() -> Path:
 -    global PRODUCTION, TESTING, BASE_DIR, DATA_DIR
--
--    if TESTING:
--        return BASE_DIR.joinpath(DATA_DIR if DATA_DIR else "tests/.temp")
--
++    global TESTING
+ 
+     if TESTING:
+         return BASE_DIR.joinpath(DATA_DIR if DATA_DIR else "tests/.temp")
+ 
 -    if PRODUCTION:
 -        return Path(DATA_DIR if DATA_DIR else "/app/data")
 -
 -    return BASE_DIR.joinpath("dev", "data")
--
 +    state_dir = os.getenv("STATE_DIRECTORY")
 +    if not state_dir:
 +        raise Exception("State directory not set")
 +    return Path(state_dir)
  
+ 
  @lru_cache
- def get_app_dirs() -> AppDirectories:
