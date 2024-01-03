@@ -102,10 +102,8 @@ in
         DynamicUser = true;
         User = "mealie";
         ExecStartPre = let
-          alembic_scripts_path = "/var/lib/mealie/alembic";
           exec = pkgs.writeShellScript "startup-mealie.sh" ''
-            ${pkgs.toybox}/bin/sed 's+script_location = alembic+script_location = ${alembic_scripts_path}+g' ${src}/alembic.ini > $ALEMBIC_CONFIG_FPATH
-            ${pkgs.toybox}/bin/cp -r ${src}/alembic ${alembic_scripts_path}
+            ${pkgs.toybox}/bin/sed 's+script_location = alembic+script_location = ${src}/alembic+g' ${src}/alembic.ini > $ALEMBIC_CONFIG_FPATH
             ${backend.interpreter} ${backend}/lib/${backend.python.libPrefix}/site-packages/mealie/db/init_db.py
           '';
         in "${exec}";
