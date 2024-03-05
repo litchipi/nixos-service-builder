@@ -1,0 +1,25 @@
+diff --git a/src/svncterm_server/SConstruct b/src/svncterm_server/SConstruct
+index cf40432da0..402822474a 100644
+--- a/src/svncterm_server/SConstruct
++++ b/src/svncterm_server/SConstruct
+@@ -19,7 +19,9 @@ import os
+ env = Environment()
+ 
+ env['LIBS'] = ['-lz']
+-env['CFLAGS'] = ['-std=c99', '-Wall']
++env['CFLAGS'] = os.environ['CFLAGS'] + ' -std=c99 -Wall'
++env['LDFLAGS'] = os.environ['LDFLAGS']
++env['LINKFLAGS'] = os.environ['LINKFLAGS']
+ 
+ env.Program('genfont.c')
+ 
+@@ -27,6 +29,8 @@ env = Environment()
+ env['LIBS'] = ['-lvncserver', '-lnsl', '-lpthread', '-lz', '-ljpeg',
+                '-lutil', '-lgnutls']
+ 
+-env['CFLAGS'] = ['-D_GNU_SOURCE', '-std=c99', '-Wall']
++env['CFLAGS'] = os.environ['CFLAGS'] + ' -D_GNU_SOURCE -std=c99 -Wall'
++env['LDFLAGS'] = os.environ['LDFLAGS']
++env['LINKFLAGS'] = os.environ['LINKFLAGS']
+ 
+ env.Program('svncterm_server.c')

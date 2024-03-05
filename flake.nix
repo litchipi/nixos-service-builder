@@ -21,6 +21,7 @@
   flake-utils.lib.eachDefaultSystem (system:
    let
     pkgs = import nixpkgs { inherit system; };
+    lib = pkgs.lib;
 
     built_system = nixosgen.nixosGenerate {
       inherit pkgs;
@@ -28,6 +29,7 @@
       modules = [ ./base.nix ./module.nix home-manager.nixosModules.home-manager ];
     };
   in {
+    packages.default = import ./one.nix { inherit pkgs lib; };
     apps.default = {
       type = "app";
       program = let
