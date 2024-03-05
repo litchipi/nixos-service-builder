@@ -58,16 +58,23 @@ in pkgs.stdenv.mkDerivation {
   LDFLAGS = INCLUDE_FLAGS + " " + LIB_FLAGS;
   LINKFLAGS = INCLUDE_FLAGS + " " + LIB_FLAGS;
 
-  patchPhase = ''
-    patchShebangs ./share
-  '';
-
   buildPhase = let
     scons_args = builtins.concatStringsSep " " [
       "new_xmlrpc=yes"
       "gitversion=release-${version}"
     ];
   in ''
+    patchShebangs ./share
+
+    cd src/svncterm_server/
+    scons
+
+    cd ../../
     scons ${scons_args}
+  '';
+
+  # TODO  Test if this works
+  installPhase = ''
+    ./install.sh -u one -g one -d $out -c -s -F -G -6 -f -e
   '';
 }
