@@ -42,6 +42,7 @@ in pkgs.stdenv.mkDerivation {
 
   patches = [
     ./svncterm_server_scons.patch
+    ./install_remove_chown.patch
   ];
 
   buildInputs = with pkgs; [
@@ -73,8 +74,13 @@ in pkgs.stdenv.mkDerivation {
     scons ${scons_args}
   '';
 
-  # TODO  Test if this works
+  # TODO  Install phase
+  #  Remove chown from installation
+  #  Use copy files from src, instead of symlink
+
   installPhase = ''
+    patchShebangs ./install.sh
+    mkdir -p $out/bin $out/sbin $out/lib $out/etc $out/var
     ./install.sh -u one -g one -d $out -c -s -F -G -6 -f -e
   '';
 }

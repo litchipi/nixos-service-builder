@@ -1,0 +1,23 @@
+diff --git a/install.sh b/install.sh
+index 3c1c3479b1..de4be78493 100755
+--- a/install.sh
++++ b/install.sh
+@@ -3396,13 +3396,15 @@ fi
+ 
+ if [ "$UNINSTALL" = "no" ] ; then
+     if [ "$SUNSTONE" = "yes" ] || [ "$SUNSTONE_DEV" = "yes" ] ; then
++        mkdir -p $DESTDIR$VAR_LOCATION/sunstone
++        mkdir -p $DESTDIR$SUNSTONE_LOCATION/public/dist
+         touch $DESTDIR$VAR_LOCATION/sunstone/main.js
+         rm -f $DESTDIR$SUNSTONE_LOCATION/public/dist/main.js
+         ln -s $VAR_LOCATION/sunstone/main.js $DESTDIR$SUNSTONE_LOCATION/public/dist/main.js
+     fi
+-    for d in $CHOWN_DIRS; do
+-        chown -R $ONEADMIN_USER:$ONEADMIN_GROUP $DESTDIR$d
+-    done
++    # for d in $CHOWN_DIRS; do
++    #     chown -R $ONEADMIN_USER:$ONEADMIN_GROUP $DESTDIR$d
++    # done
+ else
+     for d in `echo $DELETE_DIRS | awk '{for (i=NF;i>=1;i--) printf $i" "}'`; do
+         rmdir $d
