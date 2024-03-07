@@ -63,24 +63,22 @@ in pkgs.stdenv.mkDerivation {
     scons_args = builtins.concatStringsSep " " [
       "new_xmlrpc=yes"
       "gitversion=release-${version}"
+      # "docker_machine=yes"
     ];
   in ''
     patchShebangs ./share
 
     cd src/svncterm_server/
-    scons
+    scons -j $(nproc)
 
     cd ../../
-    scons ${scons_args}
+    scons ${scons_args} -j $(nproc)
   '';
 
-  # TODO  Install phase
-  #  Remove chown from installation
-  #  Use copy files from src, instead of symlink
-
+  # TODO  FIXME   Install phase
   installPhase = ''
     patchShebangs ./install.sh
     mkdir -p $out/bin $out/sbin $out/lib $out/etc $out/var
-    ./install.sh -u one -g one -d $out -c -s -F -G -6 -f -e
+    ./install.sh -u one -g one -d $out
   '';
 }

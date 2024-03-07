@@ -1,8 +1,16 @@
 diff --git a/install.sh b/install.sh
-index 3c1c3479b1..de4be78493 100755
+index 3c1c3479b1..ee33b767fc 100755
 --- a/install.sh
 +++ b/install.sh
-@@ -3396,13 +3396,15 @@ fi
+@@ -3283,6 +3283,7 @@ do_file() {
+         if [ "$LINK" = "yes" ]; then
+             ln -s $SRC_DIR/$1 $DESTDIR$2
+         else
++            echo "Copy $SRC_DIR/$1 to $DESTDIR$2"
+             cp -RL $SRC_DIR/$1 $DESTDIR$2
+         fi
+     fi
+@@ -3396,13 +3397,15 @@ fi
  
  if [ "$UNINSTALL" = "no" ] ; then
      if [ "$SUNSTONE" = "yes" ] || [ "$SUNSTONE_DEV" = "yes" ] ; then
