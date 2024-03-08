@@ -26,7 +26,7 @@
     built_system = nixosgen.nixosGenerate {
       inherit pkgs;
       format = "vm-nogui";
-      modules = [ ./base.nix ./module.nix home-manager.nixosModules.home-manager ];
+      modules = [ ./base.nix ./module.nix ./one-module.nix home-manager.nixosModules.home-manager ];
     };
   in {
     packages.default = import ./one.nix { inherit pkgs lib; };
