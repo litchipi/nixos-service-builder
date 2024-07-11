@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-23.11";
+    localnixpkgs.url = "path:/home/john/work/nix/nixpkgs";
 
     flake-utils.url = "github:numtide/flake-utils";
 
@@ -17,10 +18,14 @@
     };
   };
 
-  outputs = { nixpkgs, nixosgen, flake-utils, home-manager, ...}:
+  outputs = { nixpkgs, nixosgen, flake-utils, home-manager, ...}@inputs:
   flake-utils.lib.eachDefaultSystem (system:
    let
-    pkgs = import nixpkgs { inherit system; };
+    localpkgs = import inputs.localnixpkgs { inherit system; };
+    pkgs = import nixpkgs {
+      inherit system;
+      overlays = [(self: super: { local = localpkgs; })];
+    };
 
     built_system = nixosgen.nixosGenerate {
       inherit pkgs;
